@@ -1,8 +1,11 @@
 import os
-from openai import OpenAI
 import streamlit as st
+from openai import OpenAI
+import speech_recognition as sr
 from gtts import gTTS
-import base64
+import tempfile
+import subprocess
+from difflib import SequenceMatcher
 
 # OpenAI API 키 설정
 os.environ["OPENAI_API_KEY"] = st.secrets['API_KEY']
@@ -26,57 +29,16 @@ if 'current_line' not in st.session_state:
 if 'conversation_history' not in st.session_state:
     st.session_state.conversation_history = []
 
-# 커스텀 CSS 스타일
-st.markdown("""
-<style>
-    .main {
-        background-color: #f0f8ff;
-        padding: 20px;
-        border-radius: 10px;
-    }
-    .stButton>button {
-        background-color: #4CAF50;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        padding: 10px 20px;
-    }
-    .stTextInput>div>div>input {
-        background-color: #e6f3ff;
-        border-radius: 5px;
-    }
-    h1 {
-        color: #2E8B57;
-        text-align: center;
-    }
-    h2 {
-        color: #4682B4;
-    }
-    .script-line {
-        background-color: white;
-        padding: 10px;
-        border-radius: 5px;
-        margin-bottom: 5px;
-    }
-</style>
-""", unsafe_allow_html=True)
-
 # 제목 설정
 st.title("🕷️ Charlotte's Web Interactive Learning 🐷")
 
-# 텍스트를 음성으로 변환하고 재생하는 함수
+# 텍스트를 음성으로 변환하고 재생하는 함수 (리눅스 환경용)
 def text_to_speech(text):
     tts = gTTS(text=text, lang='en')
-    tts.save("current_line.mp3")
-    
-    with open("current_line.mp3", "rb") as f:
-        audio_bytes = f.read()
-    audio_b64 = base64.b64encode(audio_bytes).decode()
-    
-    audio_player = f'<audio autoplay="true" src="data:audio/mp3;base64,{audio_b64}">'
-    st.markdown(audio_player, unsafe_allow_html=True)
-    
-    os.remove("current_line.mp3")
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as fp:
+        tts.save(fp.name)
+        subprocess.run(["play", fp.name], check=True)
+    os.unlink(fp.name)
 
 # GPT-4를 사용한 대화 생성 함수
 def generate_response(prompt):
@@ -97,7 +59,27 @@ def generate_response(prompt):
     except Exception as e:
         st.error(f"An error occurred: {str(e)}")
         return "I'm sorry, I encountered an error. Please try again."
+
+# 음성 인식 함수
+def recognize_speech():
+    r = sr.Recognizer()
+    with sr.Microphone() as source:
+        st.write("말씀해 주세요...")
+        audio = r.listen(source)
     
+    try:
+        text = r.recognize_google(audio, language="en-US")
+        return text
+    except sr.UnknownValueError:
+        return "음성을 인식할 수 없습니다."
+    except sr.RequestError:
+        return "Google Speech Recognition 서비스에 접근할 수 없습니다."
+
+# 음성 인식 정확도 평가 함수
+def evaluate_speech_accuracy(original_text, recognized_text):
+    similarity = SequenceMatcher(None, original_text.lower(), recognized_text.lower()).ratio()
+    return similarity * 100
+
 # 사이드바에 전체 대본 표시
 st.sidebar.header("Full Script")
 for i, line in enumerate(initial_script):
@@ -125,7 +107,27 @@ st.info(f"Current line: {initial_script[st.session_state.current_line]}")
 
 # 대화형 학습 섹션
 st.header("💬 Interactive Learning")
-user_input = st.text_input("Ask a question about the story, characters, or language:")
+input_method = st.radio("Choose input method:", ("Text", "Voice"))
+
+if input_method == "Text":
+    user_input = st.text_input("Ask a question about the story, characters, or language:")
+else:
+    if st.button("🎤 Start Voice Input"):
+        user_input = recognize_speech()
+        st.write(f"You said: {user_input}")
+        
+        # 음성 인식 정확도 평가 및 표시
+        current_line = initial_script[st.session_state.current_line]
+        accuracy = evaluate_speech_accuracy(current_line, user_input)
+        st.write(f"Speech recognition accuracy: {accuracy:.2f}%")
+        
+        if accuracy >= 90:
+            st.success("Excellent pronunciation!")
+        elif accuracy >= 70:
+            st.info("Good pronunciation. Keep practicing!")
+        else:
+            st.warning("Your pronunciation needs some work. Try again!")
+
 if st.button("🚀 Submit"):
     with st.spinner("AI Tutor is thinking..."):
         ai_response = generate_response(user_input)
