@@ -2,14 +2,13 @@ import os
 from openai import OpenAI
 import streamlit as st
 from gtts import gTTS
-import os
 import base64
 
 # OpenAI API 키 설정
 os.environ["OPENAI_API_KEY"] = st.secrets['API_KEY']
 client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
-# 초기 대본 정의 (문장 단위로 나누어 리스트로 저장)
+# 초기 대본 정의
 initial_script = [
     "Narrator: It's a beautiful fall morning on the farm.",
     "Narrator: The leaves are turning yellow and red.",
@@ -27,8 +26,43 @@ if 'current_line' not in st.session_state:
 if 'conversation_history' not in st.session_state:
     st.session_state.conversation_history = []
 
+# 커스텀 CSS 스타일
+st.markdown("""
+<style>
+    .main {
+        background-color: #f0f8ff;
+        padding: 20px;
+        border-radius: 10px;
+    }
+    .stButton>button {
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        padding: 10px 20px;
+    }
+    .stTextInput>div>div>input {
+        background-color: #e6f3ff;
+        border-radius: 5px;
+    }
+    h1 {
+        color: #2E8B57;
+        text-align: center;
+    }
+    h2 {
+        color: #4682B4;
+    }
+    .script-line {
+        background-color: white;
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 5px;
+    }
+</style>
+""", unsafe_allow_html=True)
+
 # 제목 설정
-st.title("Charlotte's Web Interactive Learning")
+st.title("🕷️ Charlotte's Web Interactive Learning 🐷")
 
 # 텍스트를 음성으로 변환하고 재생하는 함수
 def text_to_speech(text):
@@ -48,56 +82,61 @@ def text_to_speech(text):
 def generate_response(prompt):
     st.session_state.conversation_history.append({"role": "user", "content": prompt})
     
-    rchat_completion = client.chat.completions.create(
-        model="gpt-4o",
-        messages=[
-            {"role": "system", "content": "You are an AI tutor helping a student learn English through the story of Charlotte's Web. Provide explanations, answer questions, and engage in dialogue about the story, characters, and language used. Keep your responses appropriate for young learners."},
-            *st.session_state.conversation_history
-        ]
-    )
+    try:
+        chat_completion = client.chat.completions.create(
+            model="gpt-4",
+            messages=[
+                {"role": "system", "content": "You are an AI tutor helping a student learn English through the story of Charlotte's Web. Provide explanations, answer questions, and engage in dialogue about the story, characters, and language used. Keep your responses appropriate for young learners."},
+                *st.session_state.conversation_history
+            ]
+        )
+        
+        ai_response = chat_completion.choices[0].message.content.strip()
+        st.session_state.conversation_history.append({"role": "assistant", "content": ai_response})
+        return ai_response
+    except Exception as e:
+        st.error(f"An error occurred: {str(e)}")
+        return "I'm sorry, I encountered an error. Please try again."
     
-    ai_response = response.choices[0].message['content'].strip()
-    st.session_state.conversation_history.append({"role": "assistant", "content": ai_response})
-    return ai_response
-
-# 전체 대본 표시 및 각 문장에 대한 듣기 버튼 추가
-st.write("Full Script:")
+# 사이드바에 전체 대본 표시
+st.sidebar.header("Full Script")
 for i, line in enumerate(initial_script):
-    col1, col2 = st.columns([4, 1])
-    with col1:
-        st.write(line)
-    with col2:
-        if st.button(f"Listen", key=f"listen_{i}"):
-            text_to_speech(line)
+    st.sidebar.markdown(f'<div class="script-line">{line}</div>', unsafe_allow_html=True)
+    if st.sidebar.button(f"🔊 Listen", key=f"listen_{i}"):
+        text_to_speech(line)
 
-# 순차적 듣기 기능
-st.write("Sequential Listening:")
+# 메인 화면에 순차적 듣기 기능
+st.header("🎧 Sequential Listening")
 col1, col2, col3 = st.columns(3)
 with col1:
-    if st.button("Previous line") and st.session_state.current_line > 0:
+    if st.button("⏮️ Previous line") and st.session_state.current_line > 0:
         st.session_state.current_line -= 1
 
 with col2:
-    if st.button("Listen to current line"):
+    if st.button("▶️ Listen to current line"):
         text_to_speech(initial_script[st.session_state.current_line])
 
 with col3:
-    if st.button("Next line") and st.session_state.current_line < len(initial_script) - 1:
+    if st.button("⏭️ Next line") and st.session_state.current_line < len(initial_script) - 1:
         st.session_state.current_line += 1
 
 # 현재 문장 표시
-st.write(f"Current line: {initial_script[st.session_state.current_line]}")
+st.info(f"Current line: {initial_script[st.session_state.current_line]}")
 
 # 대화형 학습 섹션
-st.write("Interactive Learning:")
+st.header("💬 Interactive Learning")
 user_input = st.text_input("Ask a question about the story, characters, or language:")
-if st.button("Submit"):
-    ai_response = generate_response(user_input)
-    st.write("AI Tutor:", ai_response)
-    if st.button("Listen to AI response"):
+if st.button("🚀 Submit"):
+    with st.spinner("AI Tutor is thinking..."):
+        ai_response = generate_response(user_input)
+    st.success("AI Tutor: " + ai_response)
+    if st.button("🔊 Listen to AI response"):
         text_to_speech(ai_response)
 
 # 대화 기록 표시
-st.write("Conversation History:")
+st.header("📜 Conversation History")
 for message in st.session_state.conversation_history:
-    st.write(f"{message['role'].capitalize()}: {message['content']}")
+    if message['role'] == 'user':
+        st.markdown(f"**You:** {message['content']}")
+    else:
+        st.markdown(f"**AI Tutor:** {message['content']}")
