@@ -1,16 +1,20 @@
 import os
-from openai import OpenAI
+import openai
 import streamlit as st
-from gtts import gTTS
 import base64
-import speech_recognition as sr
 from difflib import SequenceMatcher
 
-# OpenAI API 키 설정 (기존 코드와 동일)
-os.environ["OPENAI_API_KEY"] = st.secrets['API_KEY']
-client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+# For audio recording and playback
+from streamlit_webrtc import webrtc_streamer, WebRtcMode, RTCConfiguration
+import av
+import numpy as np
+import threading
+import queue
 
-# 초기 대본 정의 (기존 코드와 동일)
+# OpenAI API key setup
+openai.api_key = st.secrets['API_KEY']
+
+# Initial script
 initial_script = [
     "Narrator: It's a beautiful fall morning on the farm.",
     "Narrator: The leaves are turning yellow and red.",
@@ -22,13 +26,11 @@ initial_script = [
     "Wilbur: Charlotte! I'm so glad you're here. Fern, isn't Charlotte amazing? She can make the most beautiful webs."
 ]
 
-# 세션 상태 초기화 (기존 코드와 동일)
 if 'current_line' not in st.session_state:
     st.session_state.current_line = 0
 if 'conversation_history' not in st.session_state:
     st.session_state.conversation_history = []
 
-# 커스텀 CSS 스타일 (기존 코드와 동일)
 st.markdown("""
 <style>
     .main {
@@ -63,36 +65,32 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# 제목 설정 (기존 코드와 동일)
 st.title("🕷️ Charlotte's Web Interactive Learning 🐷")
 
-# 텍스트를 음성으로 변환하고 재생하는 함수 (기존 코드와 동일)
 def text_to_speech(text):
-    tts = gTTS(text=text, lang='en')
-    tts.save("current_line.mp3")
-    
-    with open("current_line.mp3", "rb") as f:
-        audio_bytes = f.read()
-    audio_b64 = base64.b64encode(audio_bytes).decode()
-    
-    audio_player = f'<audio autoplay="true" src="data:audio/mp3;base64,{audio_b64}">'
-    st.markdown(audio_player, unsafe_allow_html=True)
-    
-    os.remove("current_line.mp3")
+    # Use a TTS API or library that supports in-memory audio
+    from gtts import gTTS
+    from io import BytesIO
 
-# GPT-4를 사용한 대화 생성 함수 (기존 코드와 동일)
+    tts = gTTS(text=text, lang='en')
+    audio_bytes = BytesIO()
+    tts.write_to_fp(audio_bytes)
+    audio_bytes.seek(0)
+
+    st.audio(audio_bytes.read(), format='audio/mp3')
+
 def generate_response(prompt):
     st.session_state.conversation_history.append({"role": "user", "content": prompt})
-    
+
     try:
-        chat_completion = client.chat.completions.create(
-            model="gpt-4",
+        chat_completion = openai.ChatCompletion.create(
+            model="gpt-4o",
             messages=[
                 {"role": "system", "content": "You are an AI tutor helping a student learn English through the story of Charlotte's Web. Provide explanations, answer questions, and engage in dialogue about the story, characters, and language used. Keep your responses appropriate for young learners."},
                 *st.session_state.conversation_history
             ]
         )
-        
+
         ai_response = chat_completion.choices[0].message.content.strip()
         st.session_state.conversation_history.append({"role": "assistant", "content": ai_response})
         return ai_response
@@ -100,34 +98,21 @@ def generate_response(prompt):
         st.error(f"An error occurred: {str(e)}")
         return "I'm sorry, I encountered an error. Please try again."
 
-# 음성 인식 함수 (수정됨)
 def recognize_speech():
-    r = sr.Recognizer()
-    with sr.Microphone() as source:
-        st.write("말씀해 주세요...")
-        audio = r.listen(source)
-    
-    try:
-        text = r.recognize_google(audio, language="en-US")
-        return text
-    except sr.UnknownValueError:
-        return "음성을 인식할 수 없습니다."
-    except sr.RequestError:
-        return "Google Speech Recognition 서비스에 접근할 수 없습니다."
+    # Function to process audio frames
+    pass  # This will be handled by streamlit_webrtc
 
-# 음성 인식 정확도 평가 함수 (새로 추가)
 def evaluate_speech_accuracy(original_text, recognized_text):
     similarity = SequenceMatcher(None, original_text.lower(), recognized_text.lower()).ratio()
     return similarity * 100
 
-# 사이드바에 전체 대본 표시 (기존 코드와 동일)
 st.sidebar.header("Full Script")
 for i, line in enumerate(initial_script):
     st.sidebar.markdown(f'<div class="script-line">{line}</div>', unsafe_allow_html=True)
     if st.sidebar.button(f"🔊 Listen", key=f"listen_{i}"):
         text_to_speech(line)
 
-# 메인 화면에 순차적 듣기 기능 (기존 코드와 동일)
+# Sequential Listening
 st.header("🎧 Sequential Listening")
 col1, col2, col3 = st.columns(3)
 with col1:
@@ -142,40 +127,100 @@ with col3:
     if st.button("⏭️ Next line") and st.session_state.current_line < len(initial_script) - 1:
         st.session_state.current_line += 1
 
-# 현재 문장 표시 (기존 코드와 동일)
 st.info(f"Current line: {initial_script[st.session_state.current_line]}")
 
-# 대화형 학습 섹션 (음성 인식 정확도 평가 기능 추가)
+# Interactive Learning Section
 st.header("💬 Interactive Learning")
 input_method = st.radio("Choose input method:", ("Text", "Voice"))
 
 if input_method == "Text":
     user_input = st.text_input("Ask a question about the story, characters, or language:")
 else:
-    if st.button("🎤 Start Voice Input"):
-        user_input = recognize_speech()
-        st.write(f"You said: {user_input}")
-        
-        # 음성 인식 정확도 평가 및 표시
-        current_line = initial_script[st.session_state.current_line]
-        accuracy = evaluate_speech_accuracy(current_line, user_input)
-        st.write(f"Speech recognition accuracy: {accuracy:.2f}%")
-        
-        if accuracy >= 90:
-            st.success("Excellent pronunciation!")
-        elif accuracy >= 70:
-            st.info("Good pronunciation. Keep practicing!")
-        else:
-            st.warning("Your pronunciation needs some work. Try again!")
+    st.write("녹음을 시작하려면 'Start'를 클릭하세요.")
+    # WebRTC 설정
+    RTC_CONFIGURATION = RTCConfiguration({"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]})
 
-if st.button("🚀 Submit"):
+    from streamlit_webrtc import AudioProcessorBase
+
+    class AudioProcessor(AudioProcessorBase):
+        def __init__(self):
+            self.audio_frames = []
+
+        def recv(self, frame):
+            # 오디오 프레임 수집
+            self.audio_frames.append(frame)
+            return frame
+
+    webrtc_ctx = webrtc_streamer(
+        key="speech-recognition",
+        mode=WebRtcMode.SENDONLY,
+        rtc_configuration=RTC_CONFIGURATION,
+        media_stream_constraints={"audio": True, "video": False},
+        audio_processor_factory=AudioProcessor,
+        async_processing=True,
+    )
+
+    if webrtc_ctx.audio_processor:
+        if st.button("Process Audio"):
+            st.write("오디오를 처리 중입니다...")
+            # 모든 오디오 프레임 결합
+            audio_frames = webrtc_ctx.audio_processor.audio_frames
+
+            # 오디오 프레임을 하나의 오디오 세그먼트로 변환
+            from pydub import AudioSegment
+            from io import BytesIO
+
+            combined = AudioSegment.empty()
+            for frame in audio_frames:
+                audio = frame.to_ndarray()
+                sound = AudioSegment(
+                    data=audio.tobytes(),
+                    sample_width=audio.dtype.itemsize,
+                    frame_rate=frame.sample_rate,
+                    channels=len(frame.layout.channels),
+                )
+                combined += sound
+
+            # 결합된 오디오를 BytesIO 버퍼에 저장
+            audio_buffer = BytesIO()
+            combined.export(audio_buffer, format="wav")
+            audio_buffer.seek(0)
+
+            # SpeechRecognition을 사용하여 음성 인식
+            import speech_recognition as sr
+
+            r = sr.Recognizer()
+            with sr.AudioFile(audio_buffer) as source:
+                audio_data = r.record(source)
+                try:
+                    user_input = r.recognize_google(audio_data)
+                    st.write(f"You said: {user_input}")
+
+                    # 음성 인식 정확도 평가
+                    current_line = initial_script[st.session_state.current_line]
+                    accuracy = evaluate_speech_accuracy(current_line, user_input)
+                    st.write(f"Speech recognition accuracy: {accuracy:.2f}%")
+
+                    if accuracy >= 90:
+                        st.success("Excellent pronunciation!")
+                    elif accuracy >= 70:
+                        st.info("Good pronunciation. Keep practicing!")
+                    else:
+                        st.warning("Your pronunciation needs some work. Try again!")
+                except sr.UnknownValueError:
+                    st.error("음성을 이해할 수 없습니다.")
+                except sr.RequestError:
+                    st.error("음성 인식 서비스에 요청할 수 없습니다.")
+        else:
+            st.write("녹음을 마친 후 'Process Audio'를 눌러주세요.")
+
+if st.button("🚀 Submit") and 'user_input' in locals():
     with st.spinner("AI Tutor is thinking..."):
         ai_response = generate_response(user_input)
     st.success("AI Tutor: " + ai_response)
     if st.button("🔊 Listen to AI response"):
         text_to_speech(ai_response)
 
-# 대화 기록 표시 (기존 코드와 동일)
 st.header("📜 Conversation History")
 for message in st.session_state.conversation_history:
     if message['role'] == 'user':
