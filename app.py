@@ -1,17 +1,16 @@
 import os
-import streamlit as st
 from openai import OpenAI
-import speech_recognition as sr
+import streamlit as st
 from gtts import gTTS
-import tempfile
-import subprocess
+import base64
+import speech_recognition as sr
 from difflib import SequenceMatcher
 
-# OpenAI API 키 설정
+# OpenAI API 키 설정 (기존 코드와 동일)
 os.environ["OPENAI_API_KEY"] = st.secrets['API_KEY']
 client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
-# 초기 대본 정의
+# 초기 대본 정의 (기존 코드와 동일)
 initial_script = [
     "Narrator: It's a beautiful fall morning on the farm.",
     "Narrator: The leaves are turning yellow and red.",
@@ -23,24 +22,65 @@ initial_script = [
     "Wilbur: Charlotte! I'm so glad you're here. Fern, isn't Charlotte amazing? She can make the most beautiful webs."
 ]
 
-# 세션 상태 초기화
+# 세션 상태 초기화 (기존 코드와 동일)
 if 'current_line' not in st.session_state:
     st.session_state.current_line = 0
 if 'conversation_history' not in st.session_state:
     st.session_state.conversation_history = []
 
-# 제목 설정
+# 커스텀 CSS 스타일 (기존 코드와 동일)
+st.markdown("""
+<style>
+    .main {
+        background-color: #f0f8ff;
+        padding: 20px;
+        border-radius: 10px;
+    }
+    .stButton>button {
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        padding: 10px 20px;
+    }
+    .stTextInput>div>div>input {
+        background-color: #e6f3ff;
+        border-radius: 5px;
+    }
+    h1 {
+        color: #2E8B57;
+        text-align: center;
+    }
+    h2 {
+        color: #4682B4;
+    }
+    .script-line {
+        background-color: white;
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 5px;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+# 제목 설정 (기존 코드와 동일)
 st.title("🕷️ Charlotte's Web Interactive Learning 🐷")
 
-# 텍스트를 음성으로 변환하고 재생하는 함수 (리눅스 환경용)
+# 텍스트를 음성으로 변환하고 재생하는 함수 (기존 코드와 동일)
 def text_to_speech(text):
     tts = gTTS(text=text, lang='en')
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as fp:
-        tts.save(fp.name)
-        subprocess.run(["play", fp.name], check=True)
-    os.unlink(fp.name)
+    tts.save("current_line.mp3")
+    
+    with open("current_line.mp3", "rb") as f:
+        audio_bytes = f.read()
+    audio_b64 = base64.b64encode(audio_bytes).decode()
+    
+    audio_player = f'<audio autoplay="true" src="data:audio/mp3;base64,{audio_b64}">'
+    st.markdown(audio_player, unsafe_allow_html=True)
+    
+    os.remove("current_line.mp3")
 
-# GPT-4를 사용한 대화 생성 함수
+# GPT-4를 사용한 대화 생성 함수 (기존 코드와 동일)
 def generate_response(prompt):
     st.session_state.conversation_history.append({"role": "user", "content": prompt})
     
@@ -60,7 +100,7 @@ def generate_response(prompt):
         st.error(f"An error occurred: {str(e)}")
         return "I'm sorry, I encountered an error. Please try again."
 
-# 음성 인식 함수
+# 음성 인식 함수 (수정됨)
 def recognize_speech():
     r = sr.Recognizer()
     with sr.Microphone() as source:
@@ -75,19 +115,19 @@ def recognize_speech():
     except sr.RequestError:
         return "Google Speech Recognition 서비스에 접근할 수 없습니다."
 
-# 음성 인식 정확도 평가 함수
+# 음성 인식 정확도 평가 함수 (새로 추가)
 def evaluate_speech_accuracy(original_text, recognized_text):
     similarity = SequenceMatcher(None, original_text.lower(), recognized_text.lower()).ratio()
     return similarity * 100
 
-# 사이드바에 전체 대본 표시
+# 사이드바에 전체 대본 표시 (기존 코드와 동일)
 st.sidebar.header("Full Script")
 for i, line in enumerate(initial_script):
     st.sidebar.markdown(f'<div class="script-line">{line}</div>', unsafe_allow_html=True)
     if st.sidebar.button(f"🔊 Listen", key=f"listen_{i}"):
         text_to_speech(line)
 
-# 메인 화면에 순차적 듣기 기능
+# 메인 화면에 순차적 듣기 기능 (기존 코드와 동일)
 st.header("🎧 Sequential Listening")
 col1, col2, col3 = st.columns(3)
 with col1:
@@ -102,10 +142,10 @@ with col3:
     if st.button("⏭️ Next line") and st.session_state.current_line < len(initial_script) - 1:
         st.session_state.current_line += 1
 
-# 현재 문장 표시
+# 현재 문장 표시 (기존 코드와 동일)
 st.info(f"Current line: {initial_script[st.session_state.current_line]}")
 
-# 대화형 학습 섹션
+# 대화형 학습 섹션 (음성 인식 정확도 평가 기능 추가)
 st.header("💬 Interactive Learning")
 input_method = st.radio("Choose input method:", ("Text", "Voice"))
 
@@ -135,7 +175,7 @@ if st.button("🚀 Submit"):
     if st.button("🔊 Listen to AI response"):
         text_to_speech(ai_response)
 
-# 대화 기록 표시
+# 대화 기록 표시 (기존 코드와 동일)
 st.header("📜 Conversation History")
 for message in st.session_state.conversation_history:
     if message['role'] == 'user':
