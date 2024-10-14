@@ -1,7 +1,5 @@
-import os
 import openai
 import streamlit as st
-from difflib import SequenceMatcher
 
 openai.api_key = st.secrets['API_KEY']
 
@@ -72,8 +70,9 @@ def generate_response(prompt):
     st.session_state.conversation_history.append({"role": "user", "content": prompt})
 
     try:
+        # Correct the model to gpt-4 or gpt-3.5-turbo
         chat_completion = openai.ChatCompletion.create(
-            model="gpt-4",
+            model="gpt-4",  # Alternatively, use "gpt-3.5-turbo" if needed
             messages=[
                 {"role": "system", "content": "You are an AI tutor helping a student learn English through the story of Charlotte's Web. Provide explanations, answer questions, and engage in dialogue about the story, characters, and language used. Keep your responses appropriate for young learners."},
                 *st.session_state.conversation_history
