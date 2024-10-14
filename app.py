@@ -15,19 +15,29 @@ initial_script = [
     "Charlotte: (coming down from her web) Good morning, Fern. You're right, Wilbur has many friends, including me.",
     "Wilbur: Charlotte! I'm so glad you're here. Fern, isn't Charlotte amazing? She can make the most beautiful webs.",
     "Fern: Yes, Charlotte's webs are beautiful. But Wilbur, I heard some bad news. The farmers are talking about... (whispers) making you into bacon.",
-    "Wilbur: (frightened) Oh no! What can I do? I don't want to be bacon!"
-    "Charlotte: Don't worry, Wilbur. I have an idea to save you."
-    "Fern: Really, Charlotte? What's your idea?"
-    "Charlotte: I'm going to write a message about Wilbur in my web. Something that will make the humans see how special he is."
-    "Wilbur: You can write? That's amazing, Charlotte!"
-    "Charlotte: Yes, I can. Now, I need to think of the perfect words. It will take me all night to write them."
-    "Narrator: That night, after everyone has gone to sleep, Charlotte begins her work. She moves back and forth, up and down, spinning her web and writing her message."
-    "Wilbur: (waking up) Charlotte? What are you doing up so late?"
-    "Charlotte: I'm writing the message, Wilbur. Go back to sleep. You'll see it in the morning."
-    "Narrator: In the morning, Farmer Zuckerman comes to feed the animals. He walks towards the barn, not knowing about the surprise waiting for him."
-    "Farmer Zuckerman: (enters and stops suddenly) What in the world? The spider web... it has words in it!"
-    "Farmer Zuckerman: (reading aloud) "SOME PIG"! Well, I've never seen anything like this in all my years of farming!"
-    "Wilbur: (excited) Charlotte, they noticed! They really noticed!"
+    "Wilbur: (frightened) Oh no! What can I do? I don't want to be bacon!",
+    "Charlotte: Don't worry, Wilbur. I have an idea to save you.",
+    "Fern: Really, Charlotte? What's your idea?",
+    "Charlotte: I'm going to write a message about Wilbur in my web. Something that will make the humans see how special he is.",
+    "Wilbur: You can write? That's amazing, Charlotte!",
+    "Charlotte: Yes, I can. Now, I need to think of the perfect words. It will take me all night to write them.",
+    "Narrator: That night, after everyone has gone to sleep, Charlotte begins her work. She moves back and forth, up and down, spinning her web and writing her message.",
+    "Wilbur: (waking up) Charlotte? What are you doing up so late?",
+    "Charlotte: I'm writing the message, Wilbur. Go back to sleep. You'll see it in the morning.",
+    "Narrator: In the morning, Farmer Zuckerman comes to feed the animals. He walks towards the barn, not knowing about the surprise waiting for him.",
+    "Farmer Zuckerman: (enters and stops suddenly) What in the world? The spider web... it has words in it!",
+    "Farmer Zuckerman: (reading aloud) "SOME PIG"! Well, I've never seen anything like this in all my years of farming!",
+    "Wilbur: (excited) Charlotte, they noticed! They really noticed!",
+    "Charlotte: (softly) This is just the beginning, Wilbur. Keep watching.",
+    "Narrator: Word spreads quickly about the amazing spider web. Many people come to see it, and the farm becomes very busy.",
+    "Fern: (running in) Uncle Zuckerman! Is it true? Did Charlotte really write about Wilbur?",
+    "Farmer Zuckerman: It's true, Fern! Come and see for yourself. It's the most amazing thing!",
+    "Fern: (looking at the web) Oh, Wilbur! You really are some pig!",
+    "Wilbur: (to Charlotte) Do you think this will save me, Charlotte?",
+    "Charlotte: I hope so, Wilbur. We'll keep trying. I'll write more messages if we need to.",
+    "Farmer Zuckerman: (proudly) This pig is special. We can't turn him into bacon now. He's famous!",
+    "Fern: (hugging Wilbur) Did you hear that, Wilbur? You're safe now!",
+    "Wilbur: (happily) Oh, thank you, Charlotte! You saved my life!",
 ]
 
 # 세션 상태 변수 초기화 (변경 없음)
