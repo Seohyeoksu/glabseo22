@@ -8,14 +8,26 @@ client = openai.OpenAI(api_key=st.secrets['API_KEY'])
 
 # 초기 스크립트 (변경 없음)
 initial_script = [
-    "Narrator: It's a beautiful fall morning on the farm.",
-    "Narrator: The leaves are turning yellow and red.",
-    "Narrator: Fern comes to visit Wilbur, her favorite pig.",
+    "Narrator: It's a beautiful fall morning on the farm. The leaves are turning yellow and red. Fern comes to visit Wilbur, her favorite pig.",
     "Fern: Good morning, Wilbur! How are you today?",
     "Wilbur: Oh, Fern! I'm so happy to see you. I was feeling a little lonely.",
     "Fern: Don't be lonely, Wilbur. You have so many friends here on the farm!",
-    "Charlotte: Good morning, Fern. You're right, Wilbur has many friends, including me.",
-    "Wilbur: Charlotte! I'm so glad you're here. Fern, isn't Charlotte amazing? She can make the most beautiful webs."
+    "Charlotte: (coming down from her web) Good morning, Fern. You're right, Wilbur has many friends, including me.",
+    "Wilbur: Charlotte! I'm so glad you're here. Fern, isn't Charlotte amazing? She can make the most beautiful webs.",
+    "Fern: Yes, Charlotte's webs are beautiful. But Wilbur, I heard some bad news. The farmers are talking about... (whispers) making you into bacon.",
+    "Wilbur: (frightened) Oh no! What can I do? I don't want to be bacon!"
+    "Charlotte: Don't worry, Wilbur. I have an idea to save you."
+    "Fern: Really, Charlotte? What's your idea?"
+    "Charlotte: I'm going to write a message about Wilbur in my web. Something that will make the humans see how special he is."
+    "Wilbur: You can write? That's amazing, Charlotte!"
+    "Charlotte: Yes, I can. Now, I need to think of the perfect words. It will take me all night to write them."
+    "Narrator: That night, after everyone has gone to sleep, Charlotte begins her work. She moves back and forth, up and down, spinning her web and writing her message."
+    "Wilbur: (waking up) Charlotte? What are you doing up so late?"
+    "Charlotte: I'm writing the message, Wilbur. Go back to sleep. You'll see it in the morning."
+    "Narrator: In the morning, Farmer Zuckerman comes to feed the animals. He walks towards the barn, not knowing about the surprise waiting for him."
+    "Farmer Zuckerman: (enters and stops suddenly) What in the world? The spider web... it has words in it!"
+    "Farmer Zuckerman: (reading aloud) "SOME PIG"! Well, I've never seen anything like this in all my years of farming!"
+    "Wilbur: (excited) Charlotte, they noticed! They really noticed!"
 ]
 
 # 세션 상태 변수 초기화 (변경 없음)
