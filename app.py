@@ -26,7 +26,7 @@ initial_script = [
     "Charlotte: I'm writing the message, Wilbur. Go back to sleep. You'll see it in the morning.",
     "Narrator: In the morning, Farmer Zuckerman comes to feed the animals. He walks towards the barn, not knowing about the surprise waiting for him.",
     "Farmer Zuckerman: (enters and stops suddenly) What in the world? The spider web... it has words in it!",
-    "Farmer Zuckerman: (reading aloud) "SOME PIG"! Well, I've never seen anything like this in all my years of farming!",
+    "Farmer Zuckerman: (reading aloud) SOME PIG! Well I've never seen anything like this in all my years of farming!",
     "Wilbur: (excited) Charlotte, they noticed! They really noticed!",
     "Charlotte: (softly) This is just the beginning, Wilbur. Keep watching.",
     "Narrator: Word spreads quickly about the amazing spider web. Many people come to see it, and the farm becomes very busy.",
