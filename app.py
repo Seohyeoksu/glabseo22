@@ -81,7 +81,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-st.title("🕷️ Charlotte's Web 지천초 2024 3학년 대본 🐷")
+st.title("🕷️ 지천초 2024 3학년 대본 🐷")
 
 def text_to_speech(text):
     tts = gTTS(text=text, lang='en')
