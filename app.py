@@ -8,7 +8,7 @@ client = openai.OpenAI(api_key=st.secrets['API_KEY'])
 
 # 초기 스크립트 (변경 없음)
 initial_script = [
-    "Narrator: It's a beautiful fall morning on the farm. The leaves are turning yellow and red. Fern comes to visit Wilbur, her favorite pig.",
+    "It's a beautiful fall morning on the farm. The leaves are turning yellow and red. Fern comes to visit Wilbur, her favorite pig.",
     "Fern: Good morning, Wilbur! How are you today?",
     "Wilbur: Oh, Fern! I'm so happy to see you. I was feeling a little lonely.",
     "Fern: Don't be lonely, Wilbur. You have so many friends here on the farm!",
@@ -21,15 +21,15 @@ initial_script = [
     "Charlotte: I'm going to write a message about Wilbur in my web. Something that will make the humans see how special he is.",
     "Wilbur: You can write? That's amazing, Charlotte!",
     "Charlotte: Yes, I can. Now, I need to think of the perfect words. It will take me all night to write them.",
-    "Narrator: That night, after everyone has gone to sleep, Charlotte begins her work. She moves back and forth, up and down, spinning her web and writing her message.",
+    "That night, after everyone has gone to sleep, Charlotte begins her work. She moves back and forth, up and down, spinning her web and writing her message.",
     "Wilbur: (waking up) Charlotte? What are you doing up so late?",
     "Charlotte: I'm writing the message, Wilbur. Go back to sleep. You'll see it in the morning.",
-    "Narrator: In the morning, Farmer Zuckerman comes to feed the animals. He walks towards the barn, not knowing about the surprise waiting for him.",
+    "In the morning, Farmer Zuckerman comes to feed the animals. He walks towards the barn, not knowing about the surprise waiting for him.",
     "Farmer Zuckerman: (enters and stops suddenly) What in the world? The spider web... it has words in it!",
     "Farmer Zuckerman: (reading aloud) SOME PIG! Well I've never seen anything like this in all my years of farming!",
     "Wilbur: (excited) Charlotte, they noticed! They really noticed!",
     "Charlotte: (softly) This is just the beginning, Wilbur. Keep watching.",
-    "Narrator: Word spreads quickly about the amazing spider web. Many people come to see it, and the farm becomes very busy.",
+    "Word spreads quickly about the amazing spider web. Many people come to see it, and the farm becomes very busy.",
     "Fern: (running in) Uncle Zuckerman! Is it true? Did Charlotte really write about Wilbur?",
     "Farmer Zuckerman: It's true, Fern! Come and see for yourself. It's the most amazing thing!",
     "Fern: (looking at the web) Oh, Wilbur! You really are some pig!",
